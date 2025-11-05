@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>吴吴辛苦啦，加油呀❤️</title>
+<style>
+html,body{
+  margin:0;padding:0;width:100%;height:100%;overflow:hidden;
+  background:radial-gradient(circle at top,#ffe5f1 0%,#fffafc 40%,#fdf1ff 100%);
+  font-family:"微软雅黑",system-ui,-apple-system,BlinkMacSystemFont;
+}
+#heart-container{position:absolute;left:0;top:0;width:100%;height:100%;}
+.tip-box{
+  position:absolute;width:140px;padding:6px 10px;
+  border-radius:14px;text-align:center;font-size:14px;
+  box-shadow:0 4px 10px rgba(0,0,0,0.12);box-sizing:border-box;
+  opacity:0;cursor:pointer;color:#5b4b4b;
+  border:1px solid rgba(255,255,255,0.8);
+  transform:translateY(8px);
+  transition:opacity .8s ease,transform .4s cubic-bezier(.25,.8,.25,1);
+}
+#center-text{
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  padding:10px 20px;border-radius:999px;font-size:24px;color:#ff497d;
+  font-weight:bold;background:rgba(255,255,255,.85);
+  box-shadow:0 8px 20px rgba(255,105,180,.3);
+  text-shadow:0 0 6px rgba(255,100,150,.4);z-index:10;user-select:none;
+  opacity:0;animation:textFadeIn 2s ease forwards,textGlow 3s ease-in-out infinite 2s;
+}
+@keyframes textFadeIn{to{opacity:1;}}
+@keyframes textGlow{
+  0%,100%{text-shadow:0 0 6px rgba(255,100,150,.4);}
+  50%{text-shadow:0 0 14px rgba(255,100,150,.9);}
+}
+#signature{
+  position:fixed;bottom:10px;right:14px;
+  font-size:13px;color:#a07878;font-style:italic;user-select:none;
+  text-shadow:0 0 4px rgba(255,255,255,0.8);
+  z-index:900;
+}
+#music-btn{
+  position:fixed;bottom:18px;left:50%;transform:translateX(-50%);
+  padding:9px 18px;border-radius:999px;border:none;font-size:14px;
+  background:linear-gradient(135deg,#ff9fb5,#ff6f9f);color:#fff;
+  box-shadow:0 3px 10px rgba(0,0,0,.25);cursor:pointer;z-index:999;
+}
+#music-btn:active{transform:translateX(-50%) scale(.97);}
+@media(max-width:480px){
+  #center-text{font-size:20px;padding:8px 16px;}
+  .tip-box{width:120px;font-size:13px;padding:5px 8px;}
+}
+</style>
+</head>
+<body>
+
+<div id="heart-container"></div>
+<div id="center-text">吴吴辛苦啦，加油呀❤️</div>
+<div id="signature">by 龙龙</div>
+
+<audio id="bgm" loop src="https://cdn.pixabay.com/download/audio/2023/01/13/audio_42afc9ff5f.mp3"></audio>
+<button id="music-btn">🎵 点我播放 / 暂停音乐</button>
+
+<script>
+let TIPS=[
+  "多喝水哦~保持微笑呀","每天都要元气满满","记得吃水果","保持好心情",
+  "好好爱自己","我想你了","梦想成真","期待下一次见面","金榜题名",
+  "顺顺利利","早点休息","愿所有烦恼都消失","别熬夜","今天过得开心嘛",
+  "天冷了，多穿衣服","阳光会照进每个角落","吴吴是最棒的",
+  "吃好每一顿饭","今天也要加油哦","笑一笑，超美的",
+  "早呀吴吴","晚安吴吴","爱你哦吴吴"
+];
+
+const BG_COLORS=["#ffe1ec","#d6ecff","#dff7e5","#e6e1ff","#fff3c7",
+"#f2d2ff","#ffd6c9","#ffe8d4","#dffdf6","#ffe6ea",
+"#f3fff0","#ffeef7","#f9f0ff"];
+
+const CONFIG={windowCount:80,displayTime:30000,startDelay:80,heartScale:0.4};
+
+function shuffle(array){
+  let a=array.slice();
+  for(let i=a.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+let tipPool=shuffle(TIPS);
+
+function getNextTip(){
+  if(tipPool.length===0) tipPool=shuffle(TIPS);
+  return tipPool.pop();
+}
+
+function getHeartCoordinates(i,total,w,h,bw,bh){
+  const t=2*Math.PI*i/total;
+  const x=16*Math.pow(Math.sin(t),3);
+  const y=13*Math.cos(t)-5*Math.cos(2*t)-2*Math.cos(3*t)-Math.cos(4*t);
+  const scale=Math.min(w,h)*CONFIG.heartScale/16;
+  const cx=w/2-bw/2,cy=h/2-bh/2;
+  let X=cx+x*scale+(Math.random()*10-5);
+  let Y=cy-y*scale+(Math.random()*10-5);
+  X=Math.max(0,Math.min(X,w-bw));Y=Math.max(0,Math.min(Y,h-bh));
+  return {x:X,y:Y};
+}
+
+function createTipBox(i,total){
+  const c=document.getElementById("heart-container");
+  const box=document.createElement("div");
+  box.className="tip-box";
+  box.textContent=getNextTip();
+  box.style.backgroundColor=BG_COLORS[Math.floor(Math.random()*BG_COLORS.length)];
+  c.appendChild(box);
+  const w=window.innerWidth,h=window.innerHeight;
+  const bw=box.offsetWidth||140,bh=box.offsetHeight||60;
+  const pos=getHeartCoordinates(i,total,w,h,bw,bh);
+  box.style.left=pos.x+"px";
+  box.style.top=pos.y+"px";
+
+  // 渐显+浮上来
+  setTimeout(()=>{
+    box.style.opacity=1;
+    box.style.transform="translateY(0)";
+  },150+Math.random()*200);
+
+  // 点击放大/还原
+  box.addEventListener("click",()=>{
+    const enlarged = box.dataset.enlarged==="1";
+    document.querySelectorAll(".tip-box").forEach(el=>{
+      if(el!==box){
+        el.dataset.enlarged="0";
+        el.style.transform="translateY(0)";
+        el.style.zIndex="";
+      }
+    });
+    if(enlarged){
+      box.dataset.enlarged="0";
+      box.style.transform="translateY(0)";
+      box.style.zIndex="";
+    }else{
+      box.dataset.enlarged="1";
+      box.style.transform="translateY(0) scale(1.35)";
+      box.style.zIndex="20";
+    }
+  });
+
+  setTimeout(()=>{
+    box.style.opacity=0;
+    box.style.transform="translateY(-6px)";
+    setTimeout(()=>{box.remove();},1000);
+  },CONFIG.displayTime);
+}
+
+function startTips(){
+  const t=CONFIG.windowCount;
+  for(let i=0;i<t;i++){
+    setTimeout(()=>createTipBox(i,t),i*CONFIG.startDelay+500);
+  }
+}
+
+function setupMusicControl(){
+  const a=document.getElementById("bgm");
+  const b=document.getElementById("music-btn");
+  b.addEventListener("click",()=>{
+    if(a.paused){
+      a.play().then(()=>b.textContent="🎵 点击暂停音乐")
+      .catch(()=>alert("浏览器阻止了自动播放，请再点一次~"));
+    }else{
+      a.pause();b.textContent="🎵 点我播放 / 暂停音乐";
+    }
+  });
+}
+
+window.addEventListener("load",()=>{startTips();setupMusicControl();});
+</script>
+</body>
+</html>
